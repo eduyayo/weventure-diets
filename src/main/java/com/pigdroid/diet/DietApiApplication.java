@@ -1,4 +1,4 @@
-package com.pigdroid.diet.diet;
+package com.pigdroid.diet;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
