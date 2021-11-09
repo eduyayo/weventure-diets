@@ -150,7 +150,7 @@ class JournalIT {
 		AssertionError thrown = assertThrows(AssertionError.class, () -> {
 			assertCreated(1, null, new Date(), null, null);
 		});
-		assertThat(thrown.getMessage()).contains("expected " + HttpStatus.CREATED.value());
+		assertThat(thrown.getMessage()).contains("expected: " + HttpStatus.CREATED.value());
 	 }
 
 	@Test
