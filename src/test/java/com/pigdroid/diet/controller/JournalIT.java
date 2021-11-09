@@ -58,6 +58,7 @@ class JournalIT {
 		food.setUnitType(unit);
 		food.setAmount(amount);
 		food.setUserId(userId);
+		food.setDate(date);
 
 	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	    headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);

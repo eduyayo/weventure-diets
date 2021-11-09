@@ -1,8 +1,11 @@
 package com.pigdroid.diet.dto;
 
+import java.util.Date;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pigdroid.diet.entity.UnitType;
 
 import lombok.Data;
@@ -19,5 +22,9 @@ public class CreateRequestDTO {
 
     @NotNull(message = "user id is mandatory")
 	private Long userId;
+
+	@JsonFormat
+    (shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+    private Date date;
 
 }

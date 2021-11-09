@@ -1,6 +1,7 @@
 package com.pigdroid.diet.service;
 
-import java.util.Collections;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -30,11 +31,31 @@ public class JournalService {
 		if (null == journalEntry.getUnitType()) {
 			journalEntry.setUnitType(UnitType.UNIT);
 		}
+		if (null == journalEntry.getDate()) {
+			journalEntry.setDate(new Date());
+		}
 		return journalRepository.save(journalEntry);
 	}
 
 	public List<JournalEntry> find(FindRequestDTO request) {
-		return Collections.emptyList();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(request.getByDate() != null ? request.getByDate() : new Date());
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		Date fromDate = calendar.getTime();
+
+		calendar.add(Calendar.DAY_OF_MONTH, 1);
+		Date toDate = calendar.getTime();
+		Long userId = request.getUserId();
+		List<JournalEntry> ret;
+		if (userId != null) {
+			ret = journalRepository.findByUserIdAndDateGreaterThanAndDateLessThan(userId, fromDate, toDate);
+		} else {
+			ret = journalRepository.findByDateGreaterThanAndDateLessThan(fromDate, toDate);
+		}
+		return ret;
 	}
 
 }
