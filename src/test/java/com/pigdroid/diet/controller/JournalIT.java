@@ -1,6 +1,7 @@
 package com.pigdroid.diet.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -48,13 +49,14 @@ class JournalIT {
 	}
 
 	private JournalEntry assertCreated(long userId, Date date) throws JsonProcessingException {
-		return assertCreated(userId, "donut", date);
+		return assertCreated(userId, "donut", date, UnitType.UNIT, 1);
 	}
 
-	private JournalEntry assertCreated(long userId, String foodName, Date date) throws JsonProcessingException {
+	private JournalEntry assertCreated(long userId, String foodName, Date date, UnitType unit, Integer amount) throws JsonProcessingException {
 		JournalEntry food = new JournalEntry();
 		food.setName(foodName);
-		food.setUnitType(UnitType.UNIT);
+		food.setUnitType(unit);
+		food.setAmount(amount);
 		food.setUserId(userId);
 
 	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
@@ -75,7 +77,7 @@ class JournalIT {
 
 	private JournalEntry assertCreateAndRetrieve() throws JsonMappingException, JsonProcessingException {
 		JournalEntry created = assertCreated(new Date());
-		ResponseEntity<String> responseEntity = restTemplate.getForEntity(getLocalhost() + "/journal", String.class);
+		ResponseEntity<String> responseEntity = restTemplate.getForEntity(getLocalhost() + "/journal?byDate=" + toString(new Date()), String.class);
 		List<JournalEntry> list = mapper.readValue(responseEntity.getBody(), new TypeReference<List<JournalEntry>>() {
 		});
 		JournalEntry found = findEntry(created, list);
@@ -145,19 +147,30 @@ class JournalIT {
 	@Test
 	@DisplayName("when creating with wrong data then the application responds with 400 Bad Request")
 	void testCannotCreateWithMissingMandatoryFoodName() {
-		throw new AssertionError("Not implemented");
-	}
+		AssertionError thrown = assertThrows(AssertionError.class, () -> {
+			assertCreated(1, null, new Date(), null, null);
+		});
+		assertThat(thrown.getMessage()).contains("expected " + HttpStatus.CREATED.value());
+	 }
 
 	@Test
 	@DisplayName("when listing without a date parameter then the application responds with the list for today")
-	void testListWithDefaults() {
-		throw new AssertionError("Not implemented");
+	void testListWithDefaults() throws Exception {
+		JournalEntry created = assertCreated(new Date());
+		ResponseEntity<String> responseEntity = restTemplate.getForEntity(getLocalhost() + "/journal", String.class);
+		List<JournalEntry> list = mapper.readValue(responseEntity.getBody(), new TypeReference<List<JournalEntry>>() {
+		});
+		JournalEntry found = findEntry(created, list);
+		assertThat(found).isNotNull();
+		assertThat(found).usingRecursiveComparison().isEqualTo(created);
 	}
 
 	@Test
 	@DisplayName("when creating without unit and types then the application creates the register with 1 unit")
-	void testCreatedWithDefaults() {
-		throw new AssertionError("Not implemented");
+	void testCreatedWithDefaults() throws Exception {
+		JournalEntry created = assertCreated(1, "foodName", new Date(), null, null);
+		assertThat(created.getUnitType()).isEqualTo(UnitType.UNIT);
+		assertThat(created.getAmount()).isEqualTo(1);
 	}
 
 }
